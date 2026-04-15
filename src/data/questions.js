@@ -19,6 +19,12 @@ const questions = [
     question: "Who painted the ceiling of the Sistine Chapel?",
     answer: "Michelangelo"
   }
+  ,
+  {
+    id: 5,
+    question: "Who painted the ceiling of the Sistine Chapel?",
+    answer: "Michelangelo"
+  }
 ];
 
 module.exports = questions;
