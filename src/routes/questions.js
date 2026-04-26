@@ -1,6 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const prisma = require("../lib/prisma");
+const authenticate = require("../middleware/auth");
+const isOwner = require("../middleware/isOwner");
+
+
+router.use(authenticate); // Apply authentication to all routes in this router
 
 // GET /questions
 // List all questions
@@ -13,8 +18,8 @@ router.get("/", async (req, res) => {
   res.json(questions);
 });
 
-  // GET /questions/:questionId
-// Show a specific question
+// GET /questions/:questionId
+// Show a specific question -> GET api/questions/3
 router.get("/:questionId", async (req, res) => {
   const questionId = Number(req.params.questionId);
 
@@ -43,16 +48,18 @@ router.post("/", async (req, res) => {
 
   const newQuestion = await prisma.question.create({
     data: {
-      question, answer
+      question, answer,
+      userId: req.user.userId,
     },
   });
 
   res.status(201).json(newQuestion);
 });
 
-// PUT /questions/:questionId
-// Edit a question
-router.put("/:questionId", async (req, res) => {
+// PUT /questions/:questionId - Edit a question
+// isOwner checks existence and ownership
+
+router.put("/:questionId", isOwner, async (req, res) => {
 
     const questionId = Number(req.params.questionId);
     const { question, answer } = req.body;
@@ -78,9 +85,9 @@ router.put("/:questionId", async (req, res) => {
   res.json(updatedQuestion);
 });
 
-// DELETE /questions/:questionId
-// Delete a question
-router.delete("/:questionId", async (req, res) => {
+// DELETE /questions/:questionId - Delete a question
+// isOwner checks existence and ownership
+router.delete("/:questionId", isOwner, async (req, res) => {
   const questionId = Number(req.params.questionId);
 
    const question = await prisma.question.findUnique({
@@ -88,7 +95,7 @@ router.delete("/:questionId", async (req, res) => {
   });
 
   if (!question) {
-    return res.status(404).json({ message: "question not found" });
+    return res.status(404).json({ message: "Question not found" });
   }
 
   await prisma.question.delete({ where: { id: questionId} });
