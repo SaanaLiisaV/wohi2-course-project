@@ -4,29 +4,30 @@ const prisma = new PrismaClient();
 
 const seedQuestions = [
   {
-    id: 1,
     question: "What is the descriptive name of Iceland?",
-    answer: "The Land of Ice and Fire"
+    answer: "The Land of Ice and Fire",
+    keywords: ["travel", "geography"],
   },
   {
-    id: 2,
     question: "What is the natural source of red dye?",
-    answer: "Cochineal insects"
+    answer: "Cochineal insects",
+    keywords: ["handicraft", "culture"],
   },
   {
-    id: 3,
     question: "What planet is closest to the sun?",
-    answer: "Mercury"
+    answer: "Mercury",
+    keywords: ["planet", "astronomy"],
   },
   {
-    id: 4,
     question: "Who painted the ceiling of the Sistine Chapel?",
-    answer: "Michelangelo"
+    answer: "Michelangelo",
+    keywords: ["art", "culture"],
   }
 ];
 
 async function main() {
   await prisma.question.deleteMany();
+  await prisma.keyword.deleteMany();
   await prisma.user.deleteMany();
 
 
@@ -49,6 +50,12 @@ async function main() {
         question: question.question,
         answer: question.answer,
          userId: user.id,
+         keywords: {
+          connectOrCreate: question.keywords.map((kw) => ({
+            where: {name: kw},
+            create: {name: kw},
+          }))
+         }
       },
     });
   }
